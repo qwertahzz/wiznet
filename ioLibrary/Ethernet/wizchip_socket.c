@@ -307,8 +307,18 @@ int8_t wizchip_disconnect(uint8_t sn)
 	{
 	   if(getSn_IR(sn) & Sn_IR_TIMEOUT)
 	   {
-	      wizchip_close(sn);
-	      return SOCKERR_TIMEOUT;
+         int8_t res;
+         if(sock_is_sending -> type == Sn_MR_TCP)
+            res = wizchip_disconnect(socket);
+         else
+            res = wizchip_close(socket);
+
+         if(res != SOCK_OK)
+         {
+            LOG_E("WIZnet socket(%d) close failed.", socket);
+            free_socket(sock);
+	         return SOCKERR_TIMEOUT;
+         }
 	   }
 	}
 	return SOCK_OK;
